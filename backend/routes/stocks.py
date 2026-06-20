@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services.angel_api import AngelOneService
+from services.angel_api import AngelOneService, get_market_status
 from services.database import mysql, save_stock_data, get_historical_gainers
 
 stocks_bp = Blueprint('stocks', __name__)
@@ -26,7 +26,8 @@ def get_top_gainers():
         return jsonify({
             "success": True,
             "data": gainers,
-            "count": len(gainers)
+            "count": len(gainers),
+            "market_status": get_market_status()
         })
     except Exception as e:
         return jsonify({
@@ -42,7 +43,8 @@ def get_all_stocks():
         return jsonify({
             "success": True,
             "data": stocks,
-            "count": len(stocks)
+            "count": len(stocks),
+            "market_status": get_market_status()
         })
     except Exception as e:
         return jsonify({
@@ -64,7 +66,8 @@ def get_top_losers():
         return jsonify({
             "success": True,
             "data": losers,
-            "count": len(losers)
+            "count": len(losers),
+            "market_status": get_market_status()
         })
     except Exception as e:
         return jsonify({
@@ -106,7 +109,8 @@ def get_market_summary():
                 "top_gainer": top_gainer,
                 "top_loser": top_loser,
                 "market_sentiment": "Bullish" if len(gainers) > len(losers) else "Bearish"
-            }
+            },
+            "market_status": get_market_status()
         })
     except Exception as e:
         return jsonify({

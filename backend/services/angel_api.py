@@ -1,8 +1,30 @@
 from SmartApi import SmartConnect
 import pyotp
 from config import Config
+from datetime import datetime, time as dtime
 import json
 import requests
+
+
+def get_market_status():
+    """
+    Determine if NSE is currently open.
+    NSE regular session: Mon-Fri, 09:15 - 15:30 IST.
+    Does not account for exchange holidays (would need a holiday calendar feed).
+    """
+    now = datetime.now()
+    is_weekday = now.weekday() < 5  # Mon=0 ... Fri=4
+    market_open = dtime(9, 15)
+    market_close = dtime(15, 30)
+    is_open = is_weekday and market_open <= now.time() <= market_close
+
+    return {
+        "is_open": is_open,
+        "label": "Market Open" if is_open else "Market Closed",
+        "note": None if is_open else "Showing last available traded data (LTP/close from the last session).",
+        "checked_at": now.isoformat()
+    }
+
 
 class AngelOneService:
     def __init__(self):
