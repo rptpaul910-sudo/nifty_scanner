@@ -1,0 +1,8 @@
+[providers]
+node = true
+
+[phases.install]
+cmds = ["cd frontend && npm install"]
+
+[phases.build]
+cmds = ["cd frontend && npm run build"]
