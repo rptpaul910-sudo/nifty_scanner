@@ -1,23 +1,25 @@
 import React from 'react';
 import { RefreshCw, TrendingUp } from 'lucide-react';
 
-const Header = ({ onRefresh, isLoading, lastUpdated }) => {
-  const isMarketOpen = () => {
+const Header = ({ onRefresh, isLoading, lastUpdated, marketStatus }) => {
+  // Instant client-side estimate shown only until the backend's authoritative
+  // market_status (IST-based, computed server-side) arrives on first load.
+  const estimateMarketOpen = () => {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const day = now.getDay();
-    
-    // Market hours: Mon-Fri, 9:15 AM - 3:30 PM IST
+
     if (day === 0 || day === 6) return false;
     if (hours < 9 || hours > 15) return false;
     if (hours === 9 && minutes < 15) return false;
     if (hours === 15 && minutes > 30) return false;
-    
+
     return true;
   };
 
-  const marketOpen = isMarketOpen();
+  const marketOpen = marketStatus ? marketStatus.is_open : estimateMarketOpen();
+  const statusLabel = marketStatus ? marketStatus.label : (marketOpen ? 'Market Open' : 'Market Closed');
 
   return (
     <header className="header">
@@ -33,9 +35,9 @@ const Header = ({ onRefresh, isLoading, lastUpdated }) => {
         </div>
         
         <div className="header-actions">
-          <div className="market-status">
+          <div className="market-status" title={marketStatus && marketStatus.note ? marketStatus.note : undefined}>
             <span className={`status-dot ${marketOpen ? 'open' : 'closed'}`}></span>
-            <span>{marketOpen ? 'Market Open' : 'Market Closed'}</span>
+            <span>{statusLabel}</span>
           </div>
           
           <button 

@@ -103,14 +103,19 @@ class AngelOneService:
                 totp=totp
             )
             
-            if data['status']:
+            if data and data.get('status'):
                 self.auth_token = data['data']['jwtToken']
                 self.refresh_token = data['data']['refreshToken']
                 self.feed_token = self.smart_api.getfeedToken()
+                print("Angel One login succeeded.")
                 return True
+
+            # API responded without raising, but rejected the login.
+            # This is the silent-failure path: no exception, no data.
+            print(f"Angel One login REJECTED. Full response: {data}")
             return False
         except Exception as e:
-            print(f"Login error: {e}")
+            print(f"Login error (exception): {e}")
             return False
     
     def get_ltp_data(self, symbol_token, exchange="NSE"):
@@ -144,6 +149,7 @@ class AngelOneService:
                 return []
         
         stocks_data = []
+        logged_first_failure = False
         
         for stock in self.nifty50_stocks:
             try:
@@ -187,6 +193,12 @@ class AngelOneService:
                             "change_percent": round(change_percent, 2),
                             "volume": volume
                         })
+                elif not logged_first_failure:
+                    # Throttled: print only the first bad response in full detail,
+                    # so a systemic failure (e.g. permission/rate-limit) doesn't
+                    # spam 50 near-identical log lines.
+                    print(f"getMarketData rejected/empty for {stock['symbol']}. Full response: {response}")
+                    logged_first_failure = True
                         
             except Exception as e:
                 print(f"Error fetching {stock['symbol']}: {e}")

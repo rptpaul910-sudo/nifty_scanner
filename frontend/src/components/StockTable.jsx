@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, ArrowUp, ArrowDown } from 'lucide-react';
 
-const StockTable = ({ stocks, title, icon: Icon, lastUpdated }) => {
+const StockTable = ({ stocks, title, icon: Icon, lastUpdated, marketStatus }) => {
   const formatNumber = (num) => {
     if (num >= 10000000) return `${(num / 10000000).toFixed(2)} Cr`;
     if (num >= 100000) return `${(num / 100000).toFixed(2)} L`;
@@ -29,7 +29,13 @@ const StockTable = ({ stocks, title, icon: Icon, lastUpdated }) => {
           </span>
         )}
       </div>
-      
+
+      {marketStatus && !marketStatus.is_open && marketStatus.note && (
+        <div className="market-closed-note">
+          {marketStatus.note}
+        </div>
+      )}
+
       <table className="stock-table">
         <thead>
           <tr>

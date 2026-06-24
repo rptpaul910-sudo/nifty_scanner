@@ -7,6 +7,7 @@ import './App.css';
 function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [marketStatus, setMarketStatus] = useState(null);
 
   const handleRefresh = async () => {
     try {
@@ -25,9 +26,10 @@ function App() {
       <Header 
         onRefresh={handleRefresh} 
         isLoading={isRefreshing}
+        marketStatus={marketStatus}
       />
       <main className="main-content">
-        <Dashboard refreshTrigger={refreshTrigger} />
+        <Dashboard refreshTrigger={refreshTrigger} onMarketStatus={setMarketStatus} />
       </main>
     </div>
   );

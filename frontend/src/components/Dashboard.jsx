@@ -12,7 +12,7 @@ import StockTable from './StockTable';
 import StockCard from './StockCard';
 import Loader from './Loader';
 
-const Dashboard = ({ refreshTrigger }) => {
+const Dashboard = ({ refreshTrigger, onMarketStatus }) => {
   const [activeTab, setActiveTab] = useState('gainers');
   const [viewMode, setViewMode] = useState('table');
   const [topGainers, setTopGainers] = useState([]);
@@ -22,6 +22,7 @@ const Dashboard = ({ refreshTrigger }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [marketStatus, setMarketStatus] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -37,7 +38,15 @@ const Dashboard = ({ refreshTrigger }) => {
       if (gainersRes.success) setTopGainers(gainersRes.data);
       if (losersRes.success) setTopLosers(losersRes.data);
       if (summaryRes.success) setMarketSummary(summaryRes.data);
-      
+
+      // market_status is identical across endpoints (computed server-side from
+      // current time), so any one response's value is sufficient.
+      const status = gainersRes.market_status || losersRes.market_status || summaryRes.market_status;
+      if (status) {
+        setMarketStatus(status);
+        if (onMarketStatus) onMarketStatus(status);
+      }
+
       setLastUpdated(new Date().toISOString());
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -185,6 +194,7 @@ const Dashboard = ({ refreshTrigger }) => {
           title={activeTab === 'gainers' ? 'Top Gainers' : 'Top Losers'}
           icon={activeTab === 'gainers' ? TrendingUp : TrendingDown}
           lastUpdated={lastUpdated}
+          marketStatus={marketStatus}
         />
       ) : (
         <div className="stock-cards-grid">
